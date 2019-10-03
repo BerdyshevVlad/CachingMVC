@@ -16,7 +16,7 @@ namespace CachingMVC.Services
             _cache = cache;
         }
 
-        public async Task<TResult> TryExecute<TResult>(Func<Task<TResult>> action,int? id)
+        public async Task<TResult> TryExecuteAsync<TResult>(Func<Task<TResult>> action,int? id)
         {
             try
             {

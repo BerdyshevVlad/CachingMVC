@@ -26,7 +26,7 @@ namespace CachingMVC.Controllers
         public async Task<IActionResult> Get(int id)
         {
 
-            var product = await _cashService.TryExecute<Product>(() => _productRepository.GetProduct(id),id);
+            var product = await _cashService.TryExecuteAsync<Product>(() => _productRepository.GetProduct(id),id);
 
             if (product != null)
                 return Content($"Product: {product.Name}");
@@ -42,7 +42,7 @@ namespace CachingMVC.Controllers
             //productCreate.Price = 9324;
             //productCreate.Company = "Nokia";
 
-            var product = await _cashService.TryExecute<Product>(() => _productRepository.AddProduct(productCreate), null);
+            var product = await _cashService.TryExecuteAsync<Product>(() => _productRepository.AddProduct(productCreate), null);
 
             if (product != null)
                 return Content($"Product: {product.Name} is created with id: {product.Id}!");

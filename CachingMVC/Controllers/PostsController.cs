@@ -27,7 +27,7 @@ namespace CachingMVC.Controllers
         public async Task<IActionResult> Get(int id)
         {
 
-            var post = await _cashService.TryExecute<Post>(() => _postRepository.GetPost(id), id);
+            var post = await _cashService.TryExecuteAsync<Post>(() => _postRepository.GetPost(id), id);
 
             if (post != null)
                 return Content($"Description: {post.Description}");
