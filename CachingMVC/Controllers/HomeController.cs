@@ -6,22 +6,46 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CachingMVC.Models;
 using CachingMVC.Services;
+using CachingMVC.Repositories;
 
 namespace CachingMVC.Controllers
 {
     public class HomeController : Controller
     {
-        ProductService productService;
-        public HomeController(ProductService service)
+        ProductRepository _productRepository;
+        CashService _cashService;
+        public HomeController(ProductRepository productRepository,CashService cashService)
         {
-            productService = service;
-            productService.Initialize();
+            _productRepository = productRepository;
+            productRepository.Initialize();
+            _cashService = cashService;
         }
-        public async Task<IActionResult> Index(int id)
+
+
+        [HttpGet]
+        public async Task<IActionResult> Get(int id)
         {
-            Product product = await productService.GetProduct(id);
+
+            var product = await _cashService.TryExecute<Product>(() => _productRepository.GetProduct(id),id);
+
             if (product != null)
                 return Content($"Product: {product.Name}");
+            return Content("Product not found");
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Add()
+        {
+            Product productCreate = new Product();
+            //productCreate.Name = "Nokia 320";
+            //productCreate.Price = 9324;
+            //productCreate.Company = "Nokia";
+
+            var product = await _cashService.TryExecute<Product>(() => _productRepository.AddProduct(productCreate), null);
+
+            if (product != null)
+                return Content($"Product: {product.Name} is created with id: {product.Id}!");
             return Content("Product not found");
         }
     }

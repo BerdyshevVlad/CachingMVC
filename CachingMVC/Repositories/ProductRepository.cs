@@ -7,16 +7,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace CachingMVC.Services
+namespace CachingMVC.Repositories
 {
-    public class ProductService
+    public class ProductRepository
     {
         private MobileContext db;
-        private IMemoryCache cache;
-        public ProductService(MobileContext context, IMemoryCache memoryCache)
+        public ProductRepository(MobileContext context)
         {
             db = context;
-            cache = memoryCache;
         }
 
         public void Initialize()
@@ -37,31 +35,18 @@ namespace CachingMVC.Services
             return await db.Products.ToListAsync();
         }
 
-        public void AddProduct(Product product)
+        public async Task<Product> AddProduct(Product product)
         {
-            db.Products.Add(product);
-            int n = db.SaveChanges();
-            if (n > 0)
-            {
-                cache.Set(product.Id, product, new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                });
-            }
+            await db.Products.AddAsync(product);
+            db.SaveChanges();
+
+            return product;
         }
 
         public async Task<Product> GetProduct(int id)
         {
-            Product product = null;
-            if (!cache.TryGetValue(id, out product))
-            {
-                product = await db.Products.FirstOrDefaultAsync(p => p.Id == id);
-                if (product != null)
-                {
-                    cache.Set(product.Id, product,
-                    new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromMinutes(5)));
-                }
-            }
+            Product product = await db.Products.FirstOrDefaultAsync(p => p.Id == id);
+
             return product;
         }
     }
